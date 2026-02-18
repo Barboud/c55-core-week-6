@@ -1,13 +1,26 @@
-// This is the entrypoint for your application.
-// node app.js
+import {
+  loadBooks,
+  saveBooks,
+  addBook,
+  getUnreadBooks,
+  getBooksByGenre,
+  markAsRead,
+  getTotalBooks,
+  hasUnreadBooks,
+  printAllBooks,
+  printSummary,
+} from "./readingList.js";
 
-// TODO: Implement the main application logic here
-// 1. Load books on startup
-// 2. Display all books
-// 3. Show summary statistics
-// 4. Add example of filtering by genre or read/unread status
-// 5. Add example of marking a book as read
+const newBook = {
+  id: 6,
+  title: "Clean Code",
+  author: "Robert C. Martin",
+  genre: "Software Development",
+  read: false,
+};
 
-console.log('📚 MY READING LIST 📚\n');
+addBook(newBook);
 
-// Your implementation here
+printAllBooks();
+console.log("\n");
+printSummary();

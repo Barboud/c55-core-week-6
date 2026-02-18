@@ -1,53 +1,122 @@
+import chalk from "chalk";
+import fs from "node:fs";
+
 // Place here the file operation functions for loading and saving books
 
-function loadBooks() {
-  // TODO: Implement this function
-  // Read from books.json
-  // Handle missing file (create empty array)
-  // Handle invalid JSON (notify user, use empty array)
-  // Use try-catch for error handling
+export function loadBooks() {
+  try {
+    const jsonString = fs.readFileSync("books.json", "utf8");
+    const books = JSON.parse(jsonString);
+    return books;
+  } catch (error) {
+    if (error.code === "ENOENT") {
+      const books = [];
+      return books;
+    } else if (error.name === "SyntaxError") {
+      console.log("invalid JSON");
+      const books = [];
+      return books;
+    }
+  }
 }
 
-function saveBooks(books) {
-  // TODO: Implement this function
-  // Write books array to books.json
-  // Use try-catch for error handling
+export function saveBooks(books) {
+  try {
+    fs.writeFileSync("books.json", JSON.stringify(books, null, 2));
+  } catch (error) {
+    if (error.code === "ENOENT") {
+      console.log("File not exist");
+    } else if (error.name === "SyntaxError") {
+      console.log("invalid JSON");
+    }
+  }
+  return true;
 }
 
-function addBook(book) {
-  // TODO: Implement this function
+export function addBook(book) {
+  const books = loadBooks();
+  if (!book.id) {
+    book.id = books.length + 1;
+  }
+  books.push(book);
+
+  if (saveBooks(books)) {
+    return true;
+  }
+  return false;
 }
 
-function getUnreadBooks() {
-  // TODO: Implement this function using filter()
+export function getUnreadBooks() {
+  const books = loadBooks();
+  const unreadBooks = books.filter((book) => book.read === false);
+
+  return unreadBooks;
 }
 
-function getBooksByGenre(genre) {
-  // TODO: Implement this function using filter()
+export function getReadBooks() {
+  const books = loadBooks();
+  const readBooks = books.filter((book) => book.read === true);
+
+  return readBooks;
 }
 
-function markAsRead(id) {
-  // TODO: Implement this function using map()
+export function getBooksByGenre(genre) {
+  const books = loadBooks();
+  const booksByGenre = books.filter((book) => book.genre === genre);
+
+  return booksByGenre;
 }
 
-function getTotalBooks() {
-  // TODO: Implement this function using length
+export function markAsRead(id) {
+  const books = loadBooks();
+  const updateBooks = books.map(function (book) {
+    if (book.id === id) {
+      book.read = true;
+    }
+    return { ...book };
+  });
+
+  if (saveBooks(updateBooks)) {
+    return true;
+  }
+  return false;
 }
 
-function hasUnreadBooks() {
-  // TODO: Implement this function using some()
+export function getTotalBooks() {
+  const books = loadBooks();
+  return books.length;
 }
 
-function printAllBooks() {
-  // TODO: Implement this function
-  // Loop through and display with chalk
-  // Use green for read books, yellow for unread
-  // Use cyan for titles
+export function hasUnreadBooks() {
+  const Books = loadBooks();
+  const unreadBooks = Books.some((book) => book.read === false);
+
+  return unreadBooks;
 }
 
-function printSummary() {
-  // TODO: Implement this function
-  // Show statistics with chalk
-  // Display total books, read count, unread count
-  // Use bold for stats
+export function printAllBooks() {
+  console.log(chalk.bold("📚 MY READING LIST 📚"));
+  const books = loadBooks();
+  for (const book of books) {
+    const { id, title, author, genre, read } = book;
+
+    let readStatus = null;
+    if (read === true) {
+      readStatus = chalk.green(`✓ Read`);
+    } else {
+      readStatus = chalk.yellow(`⚠ Unread`);
+    }
+
+    console.log(
+      `${id}. ${chalk.cyan(title)} by ${author} (${genre}) ${readStatus}`,
+    );
+  }
+}
+
+export function printSummary() {
+  console.log(chalk.bold("📊 SUMMARY 📊"));
+
+  console.log(chalk.bold(`Total Books: ${loadBooks().length}`));
+  console.log(chalk.green.bold(`Read: ${getReadBooks().length}`));
+  console.log(chalk.yellow.bold(`Unread: ${getUnreadBooks().length}`));
 }
